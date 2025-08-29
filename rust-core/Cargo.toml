@@ -1,0 +1,9 @@
+[package]
+name = "rust-core"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+fitsio = { version = "0.21.7", default-features = false, features = ["fitsio-src"] }
+ndarray = "0.16.1"
+ndrustfft = "0.5.0"

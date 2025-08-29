@@ -1,0 +1,3 @@
+[workspace]
+members = ["rust-core", "bindings/python"]
+resolver = "2"

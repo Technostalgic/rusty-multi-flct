@@ -1,0 +1,23 @@
+# Rust
+target/
+**/*.rs.bk
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+dist/
+build/
+.venv/
+
+# maturin
+.wheels/
+.maturin/
+
+# Editor/OS
+.DS_Store
+.idea/
+.vscode/

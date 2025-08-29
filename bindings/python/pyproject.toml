@@ -1,0 +1,18 @@
+[build-system]
+requires = ["maturin>=1.5"]
+build-backend = "maturin"
+
+[project]
+name = "rustypy-multi-flct"
+version = "0.1.0"
+requires-python = ">=3.10"
+description = "Rust-implemented multipass FLCT for destretching and motion tracking of solar observation data"
+readme = "README.md"
+authors = [{name="Isaiah Smith"},{name="Kevin Reardon"}]
+license = "MIT"
+dependencies = []
+
+[tool.maturin]
+bindings = "pyo3"
+# Consider stable ABI to reduce wheel matrix:
+# features = ["pyo3/abi3-py38"]
