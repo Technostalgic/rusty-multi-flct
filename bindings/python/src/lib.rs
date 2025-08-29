@@ -9,8 +9,6 @@ fn rustypy_multi_flct(_m: &Bound<'_, PyModule>) -> PyResult<()> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     #[test]
     fn exists() {}
 }
