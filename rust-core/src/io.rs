@@ -39,13 +39,13 @@ impl MetaFile {
     /// Returns [`Ok`] if the file can be loaded, otherwise an [`Error`]
     /// explaining why it cannot be loaded.
     pub fn load<S: AsRef<Path>>(path: S) -> Result<MetaFile> {
-        let pathstr: &Path = path.as_ref();
-        match std::fs::exists(pathstr) {
-            Ok(true) => Ok(MetaFile {
-                path: pathstr.to_owned(),
-            }),
-            Ok(false) => Err(Error::new(ErrorKind::NotFound, "Not Found")),
-            Err(e) => Err(e),
+        let path = path.as_ref();
+        if path.exists() {
+            Ok(MetaFile {
+                path: path.to_owned(),
+            })
+        } else {
+            Err(Error::new(ErrorKind::NotFound, "Filepath not found"))
         }
     }
 
