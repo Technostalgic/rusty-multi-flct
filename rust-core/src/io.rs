@@ -129,8 +129,6 @@ mod tests {
         let paths = paths;
 
         let collection = MetaCollection::load(TEST_DATA).unwrap();
-        let cc = collection.count();
-        let pc = paths.len();
         assert!(collection.count() == paths.len());
     }
 }
