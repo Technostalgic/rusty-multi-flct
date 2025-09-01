@@ -39,8 +39,8 @@ pub trait Metadata {
 impl MetaFile {
     /// Load a [`MetaFile`] from the given path
     ///
-    /// Returns [`Ok`] if the file can be loaded, otherwise an [`Error`]
-    /// explaining why it cannot be loaded.
+    /// Returns [`Ok`] ([`MetaFile`]) if the file can be loaded, otherwise 
+    /// an [`Err`] ([`Error`]) explaining why it cannot be loaded.
     pub fn load(path: impl AsRef<Path>) -> Result<MetaFile> {
         let path = path.as_ref();
         if path.exists() {
@@ -65,6 +65,11 @@ impl Metadata for MetaFile {
 }
 
 impl MetaCollection {
+    /// Load all [`MetaFile`] inside of a directory and add them to a 
+    /// new collection
+    /// 
+    /// Returns [`Ok`] ([`MetaCollection`]) if the files can be loaded, 
+    /// otherwise an [Err] ([`Error`]) explaining the issue.
     pub fn load(path: impl AsRef<Path>) -> Result<MetaCollection> {
         let mut metafiles: Vec<MetaFile> = Vec::new();
         for entry in read_dir(&path)? {
