@@ -18,18 +18,16 @@ pub struct MetaFile {
 /// Exposes metadata required for processing on related objects
 pub trait Metadata {
     /// The filesystem path associated with this [`Metadata`]
-    fn path(&self) -> &(impl AsRef<Path> + ?Sized);
+    fn path(&self) -> &Path;
 
     /// The name of the metadata file (the final component of the path)
     fn filename(&self) -> Option<&str> {
-        let pathref = self.path().as_ref();
-        pathref.file_name()?.to_str()
+        self.path().file_name()?.to_str()
     }
 
     /// The file extension of the metadata file, without the leading '.'
     fn file_extension(&self) -> Option<&str> {
-        let pathref = self.path().as_ref();
-        pathref.extension()?.to_str()
+        self.path().extension()?.to_str()
     }
 }
 
@@ -58,7 +56,7 @@ impl MetaFile {
 }
 
 impl Metadata for MetaFile {
-    fn path(&self) -> &(impl AsRef<Path> + ?Sized) {
+    fn path(&self) -> &Path {
         self.path()
     }
 }
