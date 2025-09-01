@@ -14,13 +14,13 @@ pub struct MetaFile {
 }
 
 pub trait Metadata {
-    fn path<'a>(&'a self) -> &'a impl AsRef<Path>;
+    fn path(&self) -> &impl AsRef<Path>;
 }
 
 // IMPLEMENTATIONS -------------------------------------------------------------
 
 impl Metadata for MetaFile {
-    fn path<'a>(&'a self) -> &'a impl AsRef<Path> {
+    fn path(&self) -> &impl AsRef<Path> {
         &self.path
     }
 }
