@@ -19,20 +19,26 @@ pub trait Metadata {
 
 // IMPLEMENTATIONS -------------------------------------------------------------
 
-impl Metadata for MetaFile {
-    fn path(&self) -> &impl AsRef<Path> {
+impl MetaFile {
+    pub fn load<S: AsRef<Path>>(path: S) -> Result<MetaFile> {
+        let pathstr: &Path = path.as_ref();
+        match std::fs::exists(pathstr) {
+            Ok(true) => Ok(MetaFile {
+                path: pathstr.to_owned(),
+            }),
+            Ok(false) => Err(Error::new(ErrorKind::NotFound, "Not Found")),
+            Err(e) => Err(e),
+        }
+    }
+
+    pub fn path(&self) -> &impl AsRef<Path> {
         &self.path
     }
 }
 
-pub fn load_meta_file<S: AsRef<Path>>(path: S) -> Result<MetaFile> {
-    let pathstr: &Path = path.as_ref();
-    match std::fs::exists(pathstr) {
-        Ok(true) => Ok(MetaFile {
-            path: pathstr.to_owned(),
-        }),
-        Ok(false) => Err(Error::new(ErrorKind::NotFound, "Not Found")),
-        Err(e) => Err(e),
+impl Metadata for MetaFile {
+    fn path(&self) -> &impl AsRef<Path> {
+        self.path()
     }
 }
 
@@ -40,6 +46,7 @@ pub fn load_meta_file<S: AsRef<Path>>(path: S) -> Result<MetaFile> {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use std::path::PathBuf;
 
     const TEST_DATA: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/test_data/");
@@ -50,7 +57,7 @@ mod tests {
     #[test]
     fn load_meta_file() {
         let path: PathBuf = PathBuf::from(TEST_DATA).join("test_1k_00.fits");
-        assert!(super::load_meta_file(path).is_ok())
+        assert!(MetaFile::load(path).is_ok());
     }
 
     #[test]
