@@ -1,6 +1,6 @@
 use std::{
     io::{Error, ErrorKind, Result},
-    path::{Path, PathBuf},
+    path::{self, Path, PathBuf},
 };
 
 // DEFINITIONS -----------------------------------------------------------------
@@ -17,15 +17,28 @@ pub struct MetaFile {
 
 /// Exposes metadata required for processing on related objects
 pub trait Metadata {
-    fn path(&self) -> &impl AsRef<Path>;
+    /// The filesystem path associated with this [`Metadata`]
+    fn path(&self) -> &(impl AsRef<Path> + ?Sized);
+
+    /// The name of the metadata file (the final component of the path)
+    fn filename(&self) -> Option<&str> {
+        let pathref = self.path().as_ref();
+        pathref.file_name()?.to_str()
+    }
+
+    /// The file extension of the metadata file, without the leading '.'
+    fn file_extension(&self) -> Option<&str> {
+        let pathref = self.path().as_ref();
+        pathref.extension()?.to_str()
+    }
 }
 
 // IMPLEMENTATIONS -------------------------------------------------------------
 
 impl MetaFile {
     /// Load a [`MetaFile`] from the given path
-    /// 
-    /// Returns [`Ok`] if the file can be loaded, otherwise an [`Error`] 
+    ///
+    /// Returns [`Ok`] if the file can be loaded, otherwise an [`Error`]
     /// explaining why it cannot be loaded.
     pub fn load<S: AsRef<Path>>(path: S) -> Result<MetaFile> {
         let pathstr: &Path = path.as_ref();
@@ -39,14 +52,13 @@ impl MetaFile {
     }
 
     /// The filesystem path associated with this [`MetaFile`]
-    pub fn path(&self) -> &impl AsRef<Path> {
+    pub fn path(&self) -> &Path {
         &self.path
     }
 }
 
 impl Metadata for MetaFile {
-    /// The filesystem path associated with this [`Metadata`]
-    fn path(&self) -> &impl AsRef<Path> {
+    fn path(&self) -> &(impl AsRef<Path> + ?Sized) {
         self.path()
     }
 }
@@ -65,8 +77,11 @@ mod tests {
 
     #[test]
     fn load_meta_file() {
-        let path: PathBuf = PathBuf::from(TEST_DATA).join("test_1k_00.fits");
-        assert!(MetaFile::load(path).is_ok());
+        let filename = "test_1k_00.fits";
+        let path = PathBuf::from(TEST_DATA).join(filename);
+        let metafile = MetaFile::load(path).unwrap();
+        assert!(metafile.filename().unwrap() == "test_1k_00.fits");
+        assert!(metafile.file_extension().unwrap() == "fits");
     }
 
     #[test]
