@@ -1,6 +1,6 @@
 use std::{
     io::{Error, ErrorKind, Result},
-    path::{self, Path, PathBuf},
+    path::{Path, PathBuf},
 };
 
 // DEFINITIONS -----------------------------------------------------------------
