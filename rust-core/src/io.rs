@@ -49,7 +49,7 @@ mod tests {
 
     #[test]
     fn load_meta_file() {
-        let path: PathBuf = PathBuf::from("");
+        let path: PathBuf = PathBuf::from(TEST_DATA).join("test_1k_00.fits");
         assert!(super::load_meta_file(path).is_ok())
     }
 
