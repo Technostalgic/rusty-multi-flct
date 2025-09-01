@@ -1,50 +1,63 @@
-use std::io::*;
+use std::{
+    io::{Error, ErrorKind, Result},
+    path::{Path, PathBuf},
+};
+
+// DEFINITIONS -----------------------------------------------------------------
 
 pub struct MetaCollection<'a> {
     meta_files: Vec<&'a MetaFile>,
 }
 
 pub struct MetaFile {
-    filepath: String,
+    path: PathBuf,
 }
 
-pub trait MetaData {
-    fn path<'a>(&'a self) -> &'a str;
+pub trait Metadata {
+    fn path<'a>(&'a self) -> &'a impl AsRef<Path>;
 }
 
-impl MetaData for MetaFile {
-    fn path<'a>(&'a self) -> &'a str {
-        &self.filepath
+// IMPLEMENTATIONS -------------------------------------------------------------
+
+impl Metadata for MetaFile {
+    fn path<'a>(&'a self) -> &'a impl AsRef<Path> {
+        &self.path
     }
 }
 
-pub fn load_meta_file(path: &str) -> Result<MetaFile> {
-    match std::fs::exists(path) {
+pub fn load_meta_file<S: AsRef<Path>>(path: S) -> Result<MetaFile> {
+    let pathstr: &Path = path.as_ref();
+    match std::fs::exists(pathstr) {
         Ok(true) => Ok(MetaFile {
-            filepath: path.to_owned(),
+            path: pathstr.to_owned(),
         }),
         Ok(false) => Err(Error::new(ErrorKind::NotFound, "Not Found")),
         Err(e) => Err(e),
     }
 }
 
-/// UNIT TESTS -----------------------------------------------------------------
+// UNIT TESTS ------------------------------------------------------------------
 
 #[cfg(test)]
 mod tests {
+    use std::path::PathBuf;
 
     const TEST_DATA: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/test_data/");
 
     #[test]
     fn exists() {}
 
+    #[test]
     fn load_meta_file() {
-        let path: String = TEST_DATA.to_owned() + "test_1k_00.fits";
-        if let Err(_) = super::load_meta_file(&path) { panic!() };
-		todo!();
+        let path: PathBuf = PathBuf::from("");
+        assert!(super::load_meta_file(path).is_ok())
     }
 
+    #[test]
     fn load_meta_dir() {
         todo!();
+        // load dir path
+        // create metadata collection from metas in dir
+        // check metadata collection length to match number of meta files in dir
     }
 }
