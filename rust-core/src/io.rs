@@ -5,14 +5,17 @@ use std::{
 
 // DEFINITIONS -----------------------------------------------------------------
 
+/// Collection of filesystem metadata objects
 pub struct MetaCollection<'a> {
     meta_files: Vec<&'a MetaFile>,
 }
 
+/// Individual metadata object on a filesystem
 pub struct MetaFile {
     path: PathBuf,
 }
 
+/// Exposes metadata required for processing on related objects
 pub trait Metadata {
     fn path(&self) -> &impl AsRef<Path>;
 }
@@ -20,6 +23,10 @@ pub trait Metadata {
 // IMPLEMENTATIONS -------------------------------------------------------------
 
 impl MetaFile {
+    /// Load a [`MetaFile`] from the given path
+    /// 
+    /// Returns [`Ok`] if the file can be loaded, otherwise an [`Error`] 
+    /// explaining why it cannot be loaded.
     pub fn load<S: AsRef<Path>>(path: S) -> Result<MetaFile> {
         let pathstr: &Path = path.as_ref();
         match std::fs::exists(pathstr) {
@@ -31,12 +38,14 @@ impl MetaFile {
         }
     }
 
+    /// The filesystem path associated with this [`MetaFile`]
     pub fn path(&self) -> &impl AsRef<Path> {
         &self.path
     }
 }
 
 impl Metadata for MetaFile {
+    /// The filesystem path associated with this [`Metadata`]
     fn path(&self) -> &impl AsRef<Path> {
         self.path()
     }
