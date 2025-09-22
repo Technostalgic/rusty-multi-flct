@@ -6,7 +6,7 @@ use std::{
     slice::Iter,
 };
 
-use crate::vec::FitsElement;
+use crate::vec2::FitsElement;
 
 // DEFINITIONS -----------------------------------------------------------------
 
@@ -135,7 +135,7 @@ impl MetaCollection {
 
 #[cfg(test)]
 mod tests {
-    use crate::vec::Vec2;
+    use crate::vec2::Vec2;
 
     use super::*;
     use std::{fs, path::PathBuf};
