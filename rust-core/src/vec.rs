@@ -22,7 +22,7 @@ trait Inty: Clone + Copy + Sized + PartialEq + Eq + Add + Sub + Mul + Div + TryI
 impl<T: Clone + Copy + PartialEq + Eq + Add + Sub + Mul + Div + TryInto<usize>> Inty for T {}
 
 #[derive(Clone, Copy, PartialEq, Debug)]
-struct Vec2<F = f64>
+pub struct Vec2<F = f64>
 where
     F: Numeric,
 {
@@ -51,6 +51,13 @@ where
             x: dim[0].into(),
             y: dim[1].into(),
         }
+    }
+}
+
+impl<F> From<(F, F)> for Vec2<F>
+where  F: Numeric {
+    fn from(value: (F, F)) -> Self {
+        Vec2::new(value.0, value.1)
     }
 }
 

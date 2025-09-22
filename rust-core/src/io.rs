@@ -135,6 +135,8 @@ impl MetaCollection {
 
 #[cfg(test)]
 mod tests {
+    use crate::vec::Vec2;
+
     use super::*;
     use std::{fs, path::PathBuf};
 
@@ -177,7 +179,7 @@ mod tests {
         let filename = "test_1k_00.fits";
         let path = PathBuf::from(TEST_DATA).join(filename);
         let metafile = MetaFile::load(path).unwrap();
-        let data = metafile.load_data::<f64>().unwrap();
-        todo!()
+        let data = metafile.load_data::<f32>().unwrap();
+        assert_eq!(Vec2::new(1000, 1000), data.dim().into());
     }
 }
