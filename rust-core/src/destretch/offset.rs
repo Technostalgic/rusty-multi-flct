@@ -52,10 +52,18 @@ where
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+    use ndarray::Array2;
+
     #[test]
     fn exists() {}
 
-    fn kernel_offs(){
-        todo!();
+    fn kernel_offs() {
+        let a = Array2::from_shape_fn((10, 10), |(x1, y1)| {
+            Array2::from_shape_fn((4, 4), |(x2, y2)| x1 * 16 + y1 * 16 * 10 + x2 + y2 * 4)
+        });
+        let b = a.clone() + 1;
+
+        kernel_offsets(a, b, 0.08);
     }
 }
