@@ -55,7 +55,9 @@ where
 }
 
 impl<F> From<(F, F)> for Vec2<F>
-where  F: Numeric {
+where
+    F: Numeric,
+{
     fn from(value: (F, F)) -> Self {
         Vec2::new(value.0, value.1)
     }
