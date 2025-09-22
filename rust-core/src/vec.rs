@@ -3,16 +3,28 @@ use std::ops::{Add, Div, Mul, Sub};
 
 // DEFINITIONS -----------------------------------------------------------------
 
-trait Floaty: Clone + Copy + PartialEq + Add + Sub + Mul + Div {}
-impl<T: Clone + Copy + PartialEq + Add + Sub + Mul + Div> Floaty for T {}
+pub trait FitsElement: Clone {}
+impl FitsElement for f32 {}
+impl FitsElement for f64 {}
+impl FitsElement for u8 {}
+impl FitsElement for i8 {}
+impl FitsElement for u16 {}
+impl FitsElement for i16 {}
+impl FitsElement for u32 {}
+impl FitsElement for i32 {}
+impl FitsElement for u64 {}
+impl FitsElement for i64 {}
 
-trait Inty: Clone + Copy + PartialEq + Eq + Add + Sub + Mul + Div + TryInto<usize> {}
+pub trait Numeric: Clone + Copy + Sized + PartialEq + Add + Sub + Mul + Div {}
+impl<T: Clone + Copy + PartialEq + Add + Sub + Mul + Div> Numeric for T {}
+
+trait Inty: Clone + Copy + Sized + PartialEq + Eq + Add + Sub + Mul + Div + TryInto<usize> {}
 impl<T: Clone + Copy + PartialEq + Eq + Add + Sub + Mul + Div + TryInto<usize>> Inty for T {}
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 struct Vec2<F = f64>
 where
-    F: Floaty,
+    F: Numeric,
 {
     x: F,
     y: F,
@@ -22,7 +34,7 @@ where
 
 impl<F> Vec2<F>
 where
-    F: Floaty,
+    F: Numeric,
 {
     pub fn new(x: F, y: F) -> Self {
         Vec2 { x: x, y: y }
@@ -44,7 +56,7 @@ where
 
 impl<F> Add for Vec2<F>
 where
-    F: Floaty + Add<Output = F>,
+    F: Numeric + Add<Output = F>,
 {
     type Output = Self;
     fn add(self, rhs: Vec2<F>) -> Self::Output {
@@ -54,7 +66,7 @@ where
 
 impl<F> Sub for Vec2<F>
 where
-    F: Floaty + Sub<Output = F>,
+    F: Numeric + Sub<Output = F>,
 {
     type Output = Self;
     fn sub(self, rhs: Self) -> Self::Output {
@@ -64,7 +76,7 @@ where
 
 impl<F> Mul for Vec2<F>
 where
-    F: Floaty + Mul<Output = F>,
+    F: Numeric + Mul<Output = F>,
 {
     type Output = Self;
     fn mul(self, rhs: Self) -> Self::Output {
@@ -74,7 +86,7 @@ where
 
 impl<F> Mul<F> for Vec2<F>
 where
-    F: Floaty + Mul<Output = F>,
+    F: Numeric + Mul<Output = F>,
 {
     type Output = Self;
     fn mul(self, rhs: F) -> Self::Output {
@@ -84,7 +96,7 @@ where
 
 impl<F> Div for Vec2<F>
 where
-    F: Floaty + Div<Output = F>,
+    F: Numeric + Div<Output = F>,
 {
     type Output = Self;
     fn div(self, rhs: Self) -> Self::Output {
@@ -94,7 +106,7 @@ where
 
 impl<F> Div<F> for Vec2<F>
 where
-    F: Floaty + Div<Output = F>,
+    F: Numeric + Div<Output = F>,
 {
     type Output = Self;
     fn div(self, rhs: F) -> Self::Output {

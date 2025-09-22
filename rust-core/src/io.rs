@@ -1,9 +1,12 @@
+use fitsio::{FitsFile, images::ReadImage};
+use ndarray::{Array2, ArrayD, Ix2};
 use std::{
     fs::read_dir,
-    io::{Error, ErrorKind, Result},
     path::{Path, PathBuf},
     slice::Iter,
 };
+
+use crate::vec::FitsElement;
 
 // DEFINITIONS -----------------------------------------------------------------
 
@@ -16,6 +19,12 @@ pub struct MetaFile {
 /// Collection of filesystem metadata objects
 pub struct MetaCollection {
     meta_files: Box<[MetaFile]>,
+}
+
+#[derive(Debug)]
+pub enum DataError {
+    IoError,
+    ShapeError,
 }
 
 /// Exposes metadata required for processing on related objects
@@ -32,23 +41,49 @@ pub trait Metadata {
     fn file_extension(&self) -> Option<&str> {
         self.path().extension()?.to_str()
     }
+
+    /// Load the actual data values from the metadata
+    fn load_data<F>(&self) -> Result<Array2<F>, DataError>
+    where
+        F: FitsElement,
+        ArrayD<F>: ReadImage,
+    {
+        let mut file = FitsFile::open(self.path())?;
+        let hdu = file.primary_hdu()?;
+
+        let data = hdu.read_image::<ArrayD<F>>(&mut file)?;
+        let tdata = data.into_dimensionality::<Ix2>()?;
+        Ok(tdata)
+    }
 }
 
 // IMPLEMENTATIONS -------------------------------------------------------------
+
+impl From<fitsio::errors::Error> for DataError {
+    fn from(_: fitsio::errors::Error) -> Self {
+        DataError::IoError
+    }
+}
+
+impl From<ndarray::ShapeError> for DataError {
+    fn from(_: ndarray::ShapeError) -> Self {
+        DataError::ShapeError
+    }
+}
 
 impl MetaFile {
     /// Load a [`MetaFile`] from the given path
     ///
     /// Returns [`Ok`] ([`MetaFile`]) if the file can be loaded, otherwise
     /// an [`Err`] ([`Error`]) explaining why it cannot be loaded.
-    pub fn load(path: impl AsRef<Path>) -> Result<MetaFile> {
+    pub fn load(path: impl AsRef<Path>) -> Result<MetaFile, std::io::ErrorKind> {
         let path = path.as_ref();
         if path.exists() {
             Ok(MetaFile {
                 path: path.to_owned(),
             })
         } else {
-            Err(Error::new(ErrorKind::NotFound, "Filepath not found"))
+            Err(std::io::ErrorKind::NotFound)
         }
     }
 
@@ -70,7 +105,7 @@ impl MetaCollection {
     ///
     /// Returns [`Ok`] ([`MetaCollection`]) if the files can be loaded,
     /// otherwise an [Err] ([`Error`]) explaining the issue.
-    pub fn load(path: impl AsRef<Path>) -> Result<MetaCollection> {
+    pub fn load(path: impl AsRef<Path>) -> Result<MetaCollection, std::io::Error> {
         let mut metafiles: Vec<MetaFile> = Vec::new();
         for entry in read_dir(&path)? {
             let entry = entry?;
@@ -135,5 +170,14 @@ mod tests {
 
         let collection = MetaCollection::load(TEST_DATA).unwrap();
         assert!(collection.count() == paths.len());
+    }
+
+    #[test]
+    fn load_data() {
+        let filename = "test_1k_00.fits";
+        let path = PathBuf::from(TEST_DATA).join(filename);
+        let metafile = MetaFile::load(path).unwrap();
+        let data = metafile.load_data::<f64>().unwrap();
+        todo!()
     }
 }
