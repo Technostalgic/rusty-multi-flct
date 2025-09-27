@@ -7,3 +7,4 @@ edition = "2024"
 fitsio = { version = "0.21.7", default-features = false, features = ["fitsio-src", "array"] }
 ndarray = "0.16.1"
 ndrustfft = "0.5.0"
+num-traits = "0.2.19"

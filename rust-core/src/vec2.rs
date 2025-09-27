@@ -1,9 +1,10 @@
 use ndarray::{IntoDimension, Ix2};
+use num_traits::{Num, PrimInt};
 use std::ops::{Add, Div, Mul, Sub};
 
 // DEFINITIONS -----------------------------------------------------------------
 
-pub trait FitsElement: Clone {}
+pub trait FitsElement: Num + Clone {}
 impl FitsElement for f32 {}
 impl FitsElement for f64 {}
 impl FitsElement for u8 {}
@@ -15,26 +16,20 @@ impl FitsElement for i32 {}
 impl FitsElement for u64 {}
 impl FitsElement for i64 {}
 
-pub trait Numeric: Clone + Copy + Sized + PartialEq + Add + Sub + Mul + Div {}
-impl<T: Clone + Copy + PartialEq + Add + Sub + Mul + Div> Numeric for T {}
-
-trait Inty: Clone + Copy + Sized + PartialEq + Eq + Add + Sub + Mul + Div + TryInto<usize> {}
-impl<T: Clone + Copy + PartialEq + Eq + Add + Sub + Mul + Div + TryInto<usize>> Inty for T {}
-
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Vec2<F = f64>
 where
-    F: Numeric,
+    F: Num,
 {
-    x: F,
-    y: F,
+    pub x: F,
+    pub y: F,
 }
 
 // IMPLEMENTATIONS -------------------------------------------------------------
 
 impl<F> Vec2<F>
 where
-    F: Numeric,
+    F: Num,
 {
     pub fn new(x: F, y: F) -> Self {
         Vec2 { x: x, y: y }
@@ -43,7 +38,7 @@ where
 
 impl<I> From<Ix2> for Vec2<I>
 where
-    I: Inty + From<usize>,
+    I: PrimInt + From<usize>,
 {
     fn from(value: Ix2) -> Self {
         let dim = value.into_dimension();
@@ -54,9 +49,18 @@ where
     }
 }
 
+impl<F> Into<(F, F)> for Vec2<F>
+where
+    F: Num,
+{
+    fn into(self) -> (F, F) {
+        (self.x, self.y)
+    }
+}
+
 impl<F> From<(F, F)> for Vec2<F>
 where
-    F: Numeric,
+    F: Num,
 {
     fn from(value: (F, F)) -> Self {
         Vec2::new(value.0, value.1)
@@ -65,7 +69,7 @@ where
 
 impl<F> Add for Vec2<F>
 where
-    F: Numeric + Add<Output = F>,
+    F: Num + Add<Output = F>,
 {
     type Output = Self;
     fn add(self, rhs: Vec2<F>) -> Self::Output {
@@ -75,7 +79,7 @@ where
 
 impl<F> Sub for Vec2<F>
 where
-    F: Numeric + Sub<Output = F>,
+    F: Num + Sub<Output = F>,
 {
     type Output = Self;
     fn sub(self, rhs: Self) -> Self::Output {
@@ -85,7 +89,7 @@ where
 
 impl<F> Mul for Vec2<F>
 where
-    F: Numeric + Mul<Output = F>,
+    F: Num + Mul<Output = F>,
 {
     type Output = Self;
     fn mul(self, rhs: Self) -> Self::Output {
@@ -95,7 +99,7 @@ where
 
 impl<F> Mul<F> for Vec2<F>
 where
-    F: Numeric + Mul<Output = F>,
+    F: Num + Mul<Output = F> + Copy,
 {
     type Output = Self;
     fn mul(self, rhs: F) -> Self::Output {
@@ -105,7 +109,7 @@ where
 
 impl<F> Div for Vec2<F>
 where
-    F: Numeric + Div<Output = F>,
+    F: Num + Div<Output = F>,
 {
     type Output = Self;
     fn div(self, rhs: Self) -> Self::Output {
@@ -115,7 +119,7 @@ where
 
 impl<F> Div<F> for Vec2<F>
 where
-    F: Numeric + Div<Output = F>,
+    F: Num + Div<Output = F> + Copy,
 {
     type Output = Self;
     fn div(self, rhs: F) -> Self::Output {
