@@ -1,7 +1,10 @@
 use std::fmt::Debug;
 
 use crate::{
-    destretch::offset,
+    destretch::{
+        fft::{fft2d_with_handlers, ifft2d_inplace_with_handlers},
+        offset,
+    },
     vec2::Vec2,
 };
 use ndarray::{Array2, ArrayBase, Data, Dim, Ix2};
@@ -67,58 +70,19 @@ where
         .indexed_iter()
         .zip(scene_kernels.indexed_iter())
     {
-        // convert from non-complex data to complex number arrays to work with fft
-        let mut fft_reference_0 = reference.mapv(|x| Complex::<A>::new(x, A::zero()));
-        let mut fft_subscene_0 = subscene.mapv(|x| Complex::<A>::new(x, A::zero()));
-        let mut fft_reference_1 = Array2::<Complex<A>>::zeros(subwindow_dim);
-        let mut fft_subscene_1 = Array2::<Complex<A>>::zeros(subwindow_dim);
+        // apply fft
+        let fft_reference = fft2d_with_handlers(reference, &mut handler_x, &mut handler_y);
+        let fft_subscene = fft2d_with_handlers(subscene, &mut handler_x, &mut handler_y);
 
-        // apply fft along x and y axes
-        ndfft(
-            &fft_reference_0.view(),
-            &mut fft_reference_1.view_mut(),
+        // get correlation map
+        let correlation = ifft2d_inplace_with_handlers(
+            fft_reference * fft_subscene,
             &mut handler_x,
-            0,
-        );
-        ndfft(
-            &fft_reference_1.view(),
-            &mut fft_reference_0.view_mut(),
             &mut handler_y,
-            1,
-        );
-        ndfft(
-            &fft_subscene_0.view(),
-            &mut fft_subscene_1.view_mut(),
-            &mut handler_x,
-            0,
-        );
-        ndfft(
-            &fft_subscene_1.view(),
-            &mut fft_subscene_0.view_mut(),
-            &mut handler_y,
-            1,
-        );
-
-        // get correlation map in fourier space
-        let mut correlation_0 = fft_reference_0 * fft_subscene_0;
-        let mut correlation_1 = Array2::<Complex<A>>::zeros(subwindow_dim);
-
-        // convert correlation to linear space
-        ndifft(
-            &correlation_0.view(),
-            &mut correlation_1.view_mut(),
-            &handler_x,
-            0,
-        );
-        ndifft(
-            &correlation_1.view(),
-            &mut correlation_0.view_mut(),
-            &handler_x,
-            0,
         );
 
         // find and store the correlation peak
-        let correlation_peak = correlation_0
+        let correlation_peak = correlation
             .indexed_iter()
             .max_by(|(_, a), (_, b)| a.re.partial_cmp(&b.re).unwrap())
             .unwrap()
